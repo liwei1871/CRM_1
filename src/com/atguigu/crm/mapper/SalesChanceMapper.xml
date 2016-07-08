@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.crm.mapper.SalesChanceMapper">
+	
+	<!-- 销售机会的查询条件 -->
+	<sql id="salesChanceQueryCondition">
+		WHERE s.status = #{status} AND created_user_id = #{createBy.id}
+		<if test="custName != null">
+			AND cust_name LIKE #{custName}
+		</if>
+		<if test="title != null">
+			AND title LIKE #{title}
+		</if>
+		<if test="contact != null">
+			AND contact LIKE #{contact}
+		</if>
+	</sql>
+
+	<select id="getTotalRecordNo2" resultType="long">
+		SELECT count(id) 
+		FROM sales_chances s 
+		<include refid="salesChanceQueryCondition"/>
+	</select>
+	
+	<select id="getPageList2" resultType="com.atguigu.crm.entity.SalesChance">
+		SELECT *  
+		FROM (
+			SELECT rownum rn , id, contact, contact_tel, create_date, cust_name, title 
+			FROM sales_chances 
+			<include refid="salesChanceQueryCondition"/>
+			) s
+		<![CDATA[
+			WHERE rn >= #{fromIndex} AND rn < #{endIndex} 
+		]]>
+	</select>
+
+
+	<update id="update">
+		UPDATE sales_chances SET source = #{source}, cust_name = #{custName}, rate = #{rate},
+		title = #{title}, contact = #{contact}, contact_tel = #{contactTel}, 
+		description = #{description}
+		WHERE id = #{id}
+	</update>
+
+	<select id="getById" resultType="com.atguigu.crm.entity.SalesChance">
+		SELECT id , source , cust_name , rate , title , contact , contact_tel , description , created_user_id , create_date 
+		FROM sales_chances
+		WHERE id = #{id}
+	</select>
+
+	<delete id="delete">
+		DELETE FROM sales_chances WHERE id = #{id}
+	</delete>
+
+	<insert id="save">
+		INSERT INTO sales_chances (id , source , cust_name , rate , title , contact , contact_tel , description , created_user_id , create_date , status) 
+		VALUES (crm_seq.nextval , #{source} , #{custName} , #{rate} , #{title} , #{contact} , #{contactTel} , #{description} , #{createBy.id} , #{createDate} , 1)
+	</insert>
+
+	<select id="getPageList" resultType="com.atguigu.crm.entity.SalesChance">
+		SELECT *  
+		FROM (
+			SELECT rownum rn , id, contact, contact_tel, create_date, cust_name, title 
+			FROM sales_chances 
+			WHERE status = #{status} AND created_user_id = #{createBy.id} 
+			) s
+		<![CDATA[
+			WHERE rn >= #{fromIndex} AND rn < #{endIndex} 
+		]]>
+	</select>
+
+	<select id="getTotalRecordNo" resultType="long">
+		SELECT count(id) 
+		FROM sales_chances s 
+		WHERE s.status = #{status} 
+		AND created_user_id = #{createBy.id}
+	</select>
+
+	<!-- <select id="getSalesChances" resultType="com.atguigu.crm.entity.SalesChance">
+		SELECT s.id, contact, contact_tel, create_date, cust_name, title
+		FROM sales_chances s
+		WHERE s.status = 1
+		<if test="custName != null">
+		 	AND s.cust_name LIKE #{custName}
+		</if>
+		<if test="title != null">
+			AND s.title LIKE #{title}
+		</if>
+		<if test="contact != null">
+			AND s.contact LIKE #{contact}
+		</if>
+	</select> -->
+
+
+</mapper>

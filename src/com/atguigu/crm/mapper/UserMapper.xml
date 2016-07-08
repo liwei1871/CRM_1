@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.crm.mapper.UserMapper">
+
+	<resultMap type="com.atguigu.crm.entity.User" id="userNameMap">
+		<id column="id" property="id"/>
+		<result column="enabled" property="enabled"/>
+		<result column="name" property="name"/>
+		<result column="password" property="password"/>
+		<result column="salt" property="salt"/>
+		<result column="r_name" property="role.name"/>
+		
+		<collection property="role.authorities" ofType="com.atguigu.crm.entity.Authority">
+			<id column="a_id" property="id"/>
+			<result column="a_name" property="name"/>
+			<result column="display_name" property="displayName"/>
+			<result column="url" property="url"/>
+			
+			<result column="p_id" property="parentAuthority.id"/>
+			<result column="p_display_name" property="parentAuthority.displayName"/>
+		</collection>
+		
+	</resultMap>
+
+	<select id="getUserByName" resultMap="userNameMap">
+		SELECT u.id , u.enabled , u.name , password , salt , r.name AS "r_name" ,
+				a.id AS "a_id" , a.name AS "a_name", a.display_name , a.url ,
+				p.id AS "p_id" , p.display_name AS "p_display_name"
+		FROM users u
+		LEFT OUTER JOIN roles r 
+		ON u.role_id = r.id 
+		LEFT OUTER JOIN role_authority ra 
+		ON ra.role_id = r.id 
+		LEFT OUTER JOIN authorities a 
+		ON a.id = ra.authority_id
+		LEFT OUTER JOIN authorities p
+		ON a.parent_authority_id = p.id
+		WHERE u.name = #{name}
+		
+	</select>
+
+
+</mapper>
